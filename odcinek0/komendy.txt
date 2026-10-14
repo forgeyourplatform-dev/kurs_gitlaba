@@ -1,0 +1,87 @@
+PowerShell
+
+# Install WSL with default Ubuntu distribution
+wsl --install
+
+# (Optional) Ensure WSL 2 is set as the default version
+wsl --set-default-version 2
+
+
+WSL
+
+## Updating packages and installing basic tools
+
+# Update repository index and upgrade installed packages
+sudo apt update && sudo apt upgrade -y
+
+# Install essential utility packages (curl, git, jq, networking tools)
+sudo apt install -y curl wget git jq ca-certificates gnupg lsb-release net-tools
+
+## Installing the official Docker Engine
+
+# 1. Add official Docker GPG key
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# 2. Add Docker repository to APT sources
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# 3. Update APT package index and install Docker Engine with Docker Compose plugin
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+## Permission configuration (Running without sudo)
+
+# Add current user to the docker group to run docker commands without sudo
+sudo usermod -aG docker $USER
+
+# Apply group changes to the current terminal session
+newgrp docker
+
+GitLab course
+
+# Create project directory and enter it
+mkdir -p ~/gitlab-environment && cd ~/gitlab-environment
+
+vi docker-compose.yml
+
+# 1. Start containers in detached mode
+docker compose up -d
+
+# 2. Verify status of running containers
+docker ps
+
+# 3. (Optional) Stream live logs from the GitLab container
+docker logs gitlab-server
+
+# Display temporary initial root password (valid for 24 hours)
+docker exec -it gitlab-server cat /etc/gitlab/initial_root_password
+
+Windows DNS
+
+Win + X
+PowerShell (Administrator)
+notepad C:\Windows\System32\drivers\etc\hosts
+
+add
+127.0.0.1    gitlab.local
+
+netsh interface portproxy add v4tov4 listenport=80 listenaddress=127.0.0.1 connectport=8080 connectaddress=127.0.0.1
+
+http://gitlab.local
+
+docker exec -it gitlab-runner gitlab-runner register \
+  --non-interactive \
+  --url "http://gitlab-server" \
+  --registration-token "glrt-_sFakWcONt42-qumRo4kJGc6MgpvOjEKdDoyCnU6MQ8.01.171i522lt" \
+  --executor "docker" \
+  --docker-image "docker:24.0.5" \
+  --description "Docker Local Runner" \
+  --docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
+  --docker-network-mode "gitlab-environment_default"
+
+docker exec -it gitlab-runner gitlab-runner list
