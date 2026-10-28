@@ -1,0 +1,21 @@
+.container {
+  text-align: center;
+  padding: 20px;
+}
+
+h1 {
+  color: #0066cc;
+  font-size: 2.5em;
+  margin-bottom: 10px;
+}
+
+p {
+  color: #333;
+  font-size: 1.1em;
+}
+
+.welcome-message {
+  font-weight: bold;
+  color: #00aa00;
+  margin-top: 20px;
+}

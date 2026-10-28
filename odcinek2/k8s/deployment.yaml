@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: angular-hello-world
+  labels:
+    app: angular-hello-world
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: angular-hello-world
+  template:
+    metadata:
+      labels:
+        app: angular-hello-world
+    spec:
+      containers:
+      - name: angular-hello-world
+        image: node:20-alpine
+        ports:
+        - containerPort: 80
+        command: ["npm", "start"]
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: angular-hello-world-service
+spec:
+  selector:
+    app: angular-hello-world
+  ports:
+  - port: 80
+    targetPort: 4200
+  type: LoadBalancer
